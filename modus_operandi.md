@@ -180,7 +180,8 @@ It is being a while since I wanted to try uv out, is supposed to be very fast.
 brew install uv
 uv init caspar_health_technical_challenge
 uv add dbt-core
-uv add dbt-posgres
+uv add dbt-snowflake
+dbt deps
 ```
 
 I am not using dbt-cloud since looks expensive for what it offers and it is not
