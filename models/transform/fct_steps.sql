@@ -2,6 +2,7 @@ SELECT
     id,
     external_id AS patient_id,
     steps,
-    TRY_TO_TIMESTAMP_TZ(submission_time, 'YYYY-MM-DD"T"HH24:MI:SS.FF3TZHTZM') AS submitted_at,
-    TRY_TO_TIMESTAMP_TZ(updated_at, 'YYYY-MM-DD"T"HH24:MI:SS.FF3TZHTZM') AS updated_at
+    steps * 0.002 AS minutes,
+    submission_time::TIMESTAMP_TZ AS submitted_at,
+    updated_at::TIMESTAMP_TZ AS updated_at
 FROM {{ ref('stg_steps') }}
