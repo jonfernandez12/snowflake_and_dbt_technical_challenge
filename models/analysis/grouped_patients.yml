@@ -1,0 +1,32 @@
+models:
+  - name: grouped_patients
+
+    config:
+      contract: {enforced: true}
+
+    columns:
+      - name: id
+        data_type: number(38, 0)
+        constraints:
+          - type: not_null
+          - type: unique
+      - name: first_name
+        data_type: varchar(16777216)
+
+      - name: last_name
+        data_type: varchar(16777216)
+
+      - name: country
+        data_type: varchar(16777216)
+
+      - name: exercises_minutes
+        data_type: number(38, 0)
+
+      - name: steps_minutes
+        data_type: number(38, 3)
+
+      - name: total_minutes
+        data_type: number(38, 3)
+
+      - name: total_minutes_rank
+        data_type: number(38, 0)

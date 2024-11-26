@@ -1,0 +1,40 @@
+models:
+  - name: fct_steps
+
+    config:
+      contract: {enforced: true}
+
+    columns:
+      - name: id
+        data_type: number(38, 0)
+        constraints:
+          - type: not_null
+          - type: unique
+
+      - name: patient_id
+        data_type: number(38, 0)
+        constraints:
+          - type: not_null
+          - type: foreign_key
+            to: ref('dim_patients')
+            to_columns: [id]
+
+      - name: steps
+        data_type: number(38, 0)
+        constraints:
+          - type: not_null
+
+      - name: minutes
+        data_type: number(38, 3)
+        constraints:
+          - type: not_null
+
+      - name: submitted_at
+        data_type: timestamp_tz
+        constraints:
+          - type: not_null
+
+      - name: updated_at
+        data_type: timestamp_tz
+        constraints:
+          - type: not_null

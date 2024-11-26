@@ -104,6 +104,8 @@ CREATE OR REPLACE WAREHOUSE dbt_developer_warehouse
 GRANT ALL ON WAREHOUSE dbt_developer_warehouse TO ROLE dbt_developer_role;
 ```
 
+## **Early data model approach**
+
 After that we create the data model for our patients, exercises and steps.
 The assumptions and standards I chose to follow:
 
@@ -140,31 +142,31 @@ ALTER SESSION SET TIMESTAMP_TZ_OUTPUT_FORMAT = 'YYYY-MM-DDTHH24:MI:SS.FF3TZHTZM'
 SELECT TRY_TO_TIMESTAMP_TZ('2023-08-04T21:26:24.871+0200', 'YYYY-MM-DD"T"HH24:MI:SS.FF3TZHTZM')
 ```
 It looks like it can read it know, we will take care of this when importing the
-data to Snowflake.
-
-The script looks like following:
+data to Snowflake. The table creation script I used is the following:
 ```snowflake
 CREATE OR REPLACE DATABASE caspar_health;
+USE ROLE dbt_developer_role;
 
-CREATE TABLE patients (
-    id NUMBER(38, 0),
+CREATE TABLE stg_patients (
+    row_id  NUMBER(38, 0),
+    patient_id NUMBER(38, 0),
     first_name VARCHAR(16777216),
     last_name VARCHAR(16777216),
     country VARCHAR(16777216)
 );
-CREATE TABLE exercises (
+CREATE TABLE stg_exercises (
     id NUMBER(38, 0),
-    patient_id NUMBER(38, 0),
+    external_id NUMBER(38, 0),
     minutes NUMBER(38, 0),
-    completed_at TIMESTAMP_TZ,
-    updated_at TIMESTAMP_TZ
+    completed_at VARCHAR(16777216),
+    updated_at VARCHAR(16777216)
 );
-CREATE TABLE steps (
+CREATE TABLE stg_steps (
     id NUMBER(38, 0),
-    patient_id NUMBER(38, 0),
+    external_id NUMBER(38, 0),
     steps NUMBER(38, 0),
-    submitted_at TIMESTAMP_TZ,
-    updated_at TIMESTAMP_TZ
+    submission_time VARCHAR(16777216),
+    updated_at VARCHAR(16777216)
 );
 
 ALTER SESSION SET TIMESTAMP_TZ_OUTPUT_FORMAT = 'YYYY-MM-DDTHH24:MI:SS.FF3TZHTZM';
@@ -173,6 +175,7 @@ ALTER SESSION SET TIMESTAMP_TZ_OUTPUT_FORMAT = 'YYYY-MM-DDTHH24:MI:SS.FF3TZHTZM'
 
 # Setting up DBT
 
+## Setting up the Python environment
 I am going to be using [uv](https://github.com/astral-sh/uv) as a python package to start with DBT dependencies. 
 It is being a while since I wanted to try uv out, is supposed to be very fast.
 
@@ -181,11 +184,129 @@ brew install uv
 uv init caspar_health_technical_challenge
 uv add dbt-core
 uv add dbt-snowflake
-dbt deps
 ```
 
-I am not using dbt-cloud since looks expensive for what it offers and it is not
-really complicated to set up and deploy dbt-core but maybe I regret.
+*_Yes, it was fast indeed._
+
+I am not using `dbt-cloud` since looks expensive for what it offers and it is not
+really complicated to set up and deploy `dbt-core` but maybe I regret it. I run 
+`dbt deps` to install the dependencies and then `dbt init` to create the dbt 
+project and define the following profile. 
+
+```shell
+caspar_health_technical_challenge:
+  outputs:
+    dev:
+      account: RG94457.EU-CENTRAL-1
+      database: CASPAR_HEALTH
+      password: dbt_password
+      role: dbt_developer_role
+      schema: rehabilitation_data
+      threads: 1
+      type: snowflake
+      user: dbt_user
+      warehouse: dbt_developer_warehouse
+  target: dev
+```
+
+It took sme ome time to figure the connection parameters out to create the dbt profile, more specifically;
+- *account*: I had to run a query on Snowflake to get it.
+```Snowflake
+SELECT CONCAT_WS('.', CURRENT_ACCOUNT(), REPLACE(REGEXP_REPLACE(CURRENT_REGION(), '^[^_]+_',''), '_', '-')); -- e.g.: `YY00042.EU-CENTRAL-1`
+```
+- *password and user*: I did not know if it was the Snowflake account or the 
+database specific account.
 
 I added a `generate_schema_name` and `set_query_tag` macros as recommended 
-in the [documentation]([documentation](https://quickstarts.snowflake.com/guide/data_engineering_with_apache_airflow/index.html#0)) 
+in the [documentation]([documentation](https://quickstarts.snowflake.com/guide/data_engineering_with_apache_airflow/index.html#0))  I am following.
+
+## Loading raw data
+
+After setting up dbt I decided to try to import the raw data into Snowflake.
+I added the CSV files into the `seeds` folder and tried to run `dbt seed`
+but I got the following error:
+
+```shell
+Runtime Error
+  Database error while listing schemas in database "CASPAR_HEALTH"
+  Database Error
+    002043 (02000): SQL compilation error:
+    Object does not exist, or operation cannot be performed.
+```
+
+And since I could not see the query, I went to the logs and apparently I was 
+trying to run `show objects in CASPAR_HEALTH.rehabilitation_data limit 10000`
+but, of course, `rehabilitation_data` schema does not exist, it should 
+be `public` instead. For some reason, I thought that DBT was creating a 
+new schema when adding data from seeds.
+
+I took the decision of adding the `stg` suffix to the tables names containing 
+raw data as specified in dbt documentation. I learned that, [according to this 
+post,](https://www.y42.com/learn/dbt/dbt-seed#overview-of-dbt-seeds)
+apparently `dbt seeds` is not the greatest option to bulk raw data into 
+Snowflake and honestly I would rather define a dbt model with [COPY INTO table](https://docs.snowflake.com/en/user-guide/data-load-s3-copy)
+clause from Snowflake but I do not have any personal cloud storage accounts 
+(AWS, GCP or Azure) so I am going with dbt seeds for this very specific 
+challenge.
+
+The data bulk worked with no issue for `steps` and `exercices`, however for 
+`pstients` I had to use `--full-refresh` option since the 1st column name is
+empty. Due to that, the 1st column name for this table will have 'A' instead
+of `row_id` as planned. We could have avoid this loading the data directly
+from a cloud storage by just not selecting that column. I am not planning on
+using the column anyways in further tables so it should not be an issue.
+
+## Dimensions and facts
+
+Once our raw data has been loaded, is time to discuss which 
+transformations we will be doing to our data.
+
+For this specific case and with no further knowledge about future 
+requirements I would go with a simple dimensions and facts data model design
+where Patients will be the the main dimension and Steps and Exercices the 
+facts that do not make sense without our dimension. The data model design 
+has not a big impact in this specific case apart from helping understand our 
+data and defining the primary keys (`id` in `patients`) and foreign keys 
+(`patient_id` in `steps` and `exercises`). This tables will be kept 
+in `transform` schema (as defined in the [documentation](https://quickstarts.snowflake.com/guide/data_engineering_with_apache_airflow/index.html#0))
+since they are part of the base layer of our model and they all should 
+have a `seed` or raw data as source. In this state
+we will be taking care of the transformations mentioned in section
+[Early data model approach](#early-data-model-approach) and automatic dbt 
+data QA tests defined on the table constraints such as:
+    - primary keys (unique, not null)
+    - foreign keys (referenced to the origin)
+    - type validation
+
+I added `not null` constraint to almost every field in the data model because 
+the data shows that it is possible, however, it would be great to confirm 
+and truly redefine which columns expect `null` values and which do not.
+
+Since we do not have any constraint in one model that applies to multiple 
+columns, we will be only defining `column-level` constraints and not 
+`model-level` constraints. Also, we are going to use one file per model to 
+define the schema instead of defining all the schemas in the same file so 
+the code structure scales up in a clean and organized way.
+
+## Analysis tables
+
+Finally, we are building two analysis tables and we will be using `analysis`
+schema for that.
+
+First, we will join patients data with steps and exercises data so as we can
+group it and sum it. We will also be creating the KPI `total_minutes`, a sum of
+the minutes coming from steps and exercises, so as we can get the maximum 
+value(s) in the last results table. And last but not list we will create a 
+column with a `RANK()` window function ordered by `total_minutes` descendant, 
+which will return the same value in case the maximum value is repeated for 
+different patients.
+
+Second, we will obtain our aimed KPI filtering the rank field we created in the 
+previous table with `1`.
+
+
+
+
+
+
+
