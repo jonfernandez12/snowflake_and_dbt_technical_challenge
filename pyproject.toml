@@ -1,0 +1,93 @@
+[project]
+name = "caspar-health-technical-challenge"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "apache-airflow-providers-snowflake>=5.8.1",
+    "astronomer-cosmos>=1.7.1",
+    "ruff>=0.8.0",
+    "sqlfluff>=3.2.5",
+]
+[tool.ruff]
+line-length = 79
+
+[tool.ruff.lint]
+extend-select = [
+    "I", # isort
+    # enable all pycodestyle errors, even the ones that are not enabled by
+    # default because the conflict with `black` (that we are not using).
+    "E",
+    "C90", # mccabe complexity
+    "COM", # flake8-commas
+    "C4", # flake8-comprehensions
+    "Q", # flake8-quotes
+    "RUF", # ruff specific rules
+]
+ignore = [
+    # REVIEW: Rules that get triggered by code on migration to Ruff.
+    "C901",
+    "RUF012",
+]
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "single"
+
+[tool.sqlfluff.core]
+dialect = "athena"
+# aliasing.forbid: Our qualified names are just too long. Aliases are not bad.
+# references.keywords: We are using keywords as identifiers all over the place.
+#   As the rule's documentation states, this is not a forbidden thing. If anyone
+#   is using an identifier in a breaking way, Athena will tell them.
+#   We think that inventing non-conflicting names for clear column names like
+#   "floor" (is a function, but also a valid property of addresses) would even
+#   be counter-productive.
+# structure.column_order: We want to specify the order of fields arbitrarily.
+# structure.subquery: We want to use sub-queries in `JOIN` or `FROM` clauses
+exclude_rules = "aliasing.forbid,references.keywords,structure.column_order,structure.subquery"
+# By setting limit to 0 we actually disable it. By default its 20 k
+# and some of our files are hitting this limits.
+large_file_skip_char_limit = 0
+large_file_skip_byte_limit = 0
+max_line_length = 120
+# Maybe a microsecond faster in test collection
+sql_file_exts = ".sql"
+# Maybe a microsecond faster if we disable templating?
+templater = "raw"
+
+[tool.sqlfluff.indentation]
+tab_space_size = 2
+
+[tool.sqlfluff.rules]
+allow_scalar = false
+single_table_references = "unqualified"
+
+[tool.sqlfluff.rules.ambiguous.column_references]
+group_by_and_order_by_style = "explicit"
+
+[tool.sqlfluff.rules.capitalisation.functions]
+extended_capitalisation_policy = "upper"
+
+[tool.sqlfluff.rules.capitalisation.identifiers]
+extended_capitalisation_policy = "lower"
+
+[tool.sqlfluff.rules.capitalisation.keywords]
+capitalisation_policy = "upper"
+
+[tool.sqlfluff.rules.capitalisation.literals]
+capitalisation_policy = "upper"
+
+[tool.sqlfluff.rules.capitalisation.types]
+extended_capitalisation_policy = "upper"
+
+[tool.sqlfluff.rules.convention.not_equal]
+preferred_not_equal_style = "c_style"
+
+[tool.sqlfluff.rules.references.special_chars]
+ignore_words_regex = "\\$partitions$"
+
+[tool.sqlfluff.rules.structure.join_condition_order]
+# We decided that we want to name the *joined* table first:
+# JOIN foo
+#   ON foo.a = t.a
+preferred_first_table_in_join_clause = "later"
