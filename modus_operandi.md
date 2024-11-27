@@ -302,10 +302,60 @@ which will return the same value in case the maximum value is repeated for
 different patients.
 
 Second, we will obtain our aimed KPI filtering the rank field we created in the 
-previous table with `1`.
+previous table with `1`. 
 
+I would love to create more KPIs as defined in [# Infrastructure decision](#nfrastructure-decision) 
+section but I am going to focus on deploying dbt in Airflow, adding 
+python coverage tests, sqlfluff, ruff, flake8 and proper documentation first.
 
+## Setting up Airflow
 
+Following the [documentation provided by Snowflake](https://quickstarts.snowflake.com/guide/data_engineering_with_apache_airflow/index.html#5)
+we might need to get rid of uv for setting up python requirements and go with
+plain pip requirement management. We will now prepare the repository for 
+encapsulating our model creation with dbt inside an airflow repository 
+ready to be deployed.
+
+We can create a dockerized airflow repository by creating a new folder and 
+running `astro dev init`, after that I will just add all my dbt packages
+inside dags/dbt/caspar_health_dbt_cosmos.
+
+### Setting up the DAG
+
+The `patient_data_elt` DAG is only composed by:
+1. Dbt profile definition: Which basically, thanks to a very cool `cosmos` 
+library, reads all the credentials from the predefined Airflow connections in 
+`airflow_settings.yaml`. Given the use case, I am not going to spend more time 
+trying to hide the secrets since in a real-life scenario I would just use 
+[Airflow AWS Secrets Manager Backend](https://airflow.apache.org/docs/apache-airflow-providers-amazon/stable/secrets-backends/aws-secrets-manager.html)
+for getting the credentials of the connections.
+2. Dbt DAG: Thanks to `DbtDag`, creates tasks that run every existing model in
+DBT, even the seeds!
+
+![img.png](img/successfully_running_dag.png)
+
+### Astro and cosmos
+I did not use `astro` and `cosmos` until today and is crazy how easy they make:
+- Astro: It deploys the webserver, the scheduler and 
+the trigger (I guess this is Celery). I just did not need to think about it,
+which is nice for this use case. However, I can imagine that those layers of 
+abstraction
+that adds on top of Airflow might be a bit cumbersome when we want to adjust
+Airflow to some specific needs. Also, it took me quite some time to discover 
+how to deploy the connections defined on `airflow_settings.yaml`: 
+```
+astro dev object import
+astro dev restart
+``` 
+
+- Cosmos: I really do not have any complains about it for now but again, it 
+could be not the best option if we want to really get the most out of dbt.
+
+## Setting up tests (TNDD)
+
+Well, I would have loved to apply TDD during the development of this tasks, 
+however I got excited by the use of uv at the beginning and I forgot about. 
+That is why we will call it Test Non Driven Development in this case.
 
 
 
