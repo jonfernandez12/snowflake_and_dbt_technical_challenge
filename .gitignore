@@ -1,4 +1,4 @@
-
-target/
-dbt_packages/
-logs/
+*.git
+.DS_Store
+__pycache__/
+.venv
