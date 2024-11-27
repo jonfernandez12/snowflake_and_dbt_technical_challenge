@@ -1,0 +1,24 @@
+name: 'caspar_health_technical_challenge'
+version: '1.0.0'
+
+profile: 'caspar_health_technical_challenge'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  caspar_health_technical_challenge:
+    transform:
+      materialized: view
+      schema: transform
+    analysis:
+      materialized: view
+      schema: analysis
