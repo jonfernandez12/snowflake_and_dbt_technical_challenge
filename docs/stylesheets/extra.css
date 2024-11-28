@@ -1,0 +1,25 @@
+:root {
+    --md-primary-fg-color:        #0aacac;
+    --md-accent-fg-color:         #ffffff;
+    }
+
+.md-header-nav__button.md-logo img, .md-header-nav__button.md-logo svg {
+        display: block;
+        width: 8rem;
+        height:1.2rem;
+        fill: #0aacac;
+}
+    @media only screen and (min-width: 76.25em) {
+        .md-main__inner {
+            max-width: none;
+        }
+        .md-sidebar--primary {
+            left: 0;
+        }
+        .md-sidebar--secondary {
+            right: 0;
+            margin-left: 0;
+            -webkit-transform: none;
+            transform: none;
+        }
+    }

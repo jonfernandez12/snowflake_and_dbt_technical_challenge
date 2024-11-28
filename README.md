@@ -1,54 +1,89 @@
-# Caspar Health Technical Challenge
+# Caspar Health Technical challenge
 
-This repository is meant to gather the technical challenge. In the following
-sections you will find more information about the challenge itself as well
-as the technical details about the infrastructure and data model design.
+Technical challenge for Caspar Health.
 
-## Goal of the project
+In the following sections you will find more information about the challenge
+itself as well as the technical details about the infrastructure, data model
+design and the data processing ELT.
 
-The goal of this project is to showcase an end to end ELT pipeline from a data source to
-any data warehouse/data source using Python, SQL and Git to answer the following
-question:
+# Index
 
-- Find the patient(s) with the most generated minutes.
+- [Technical Challenge Statement](docs/statement.md)
+- [Modus Operandi](docs/modus_operandi.md)
+- [Faced problems](docs/faced_problems.md)
+- [Future implementations](docs/future_implementations.md)
+- [Test report](docs/tests/index.md)
 
-In order to answer this question, you’ve been provided with the following three datasets:
-- steps.csv
-  - ID: table ID
-  - External_id: patient_id
-  - Steps: number of generated steps per submission time
-  - Submission_time: the time when the steps are submitted
-  - Updated_at: last time when the row was updated
-- exercises.csv
-  - ID: table ID
-  - External_id: patient_id
-  - minutes: total duration of an exercise in minutes
-  - completed_at: the time when the exercise was completed
-  - Updated_at: last time when the row was updated
-- patients.csv
-  - Patient_id
-  - First_name
-  - Last_name
-  -  Country
+## Install dependencies
+ I could only try it out on macOS, so it might be that it does not work in
+ Linux, but it should.
+```
+make set-up
+```
+If the environment is not activating automatically, please run 
+`source .venv/bin/activate` as mentioned in the uv logs.
 
-To solve the problem above, these are the business rules, assumptions and some handy tips:
-- As you have probably already noticed, in the steps.csv dataset, there is no column with
-the completed minutes, but rather a column with the submitted steps. That’s fine, as
-there is a business requirement saying how to convert steps into minutes using the
-following formula ->
+## Airflow Server
+
+Deploy an [astro](https://www.astronomer.io/docs/) container with Airflow webserver, scheduler and 
+executor (triggerer).
+
+```shell
+make start-airflow
+make stop-airflow
+```
+
+**The very first time starting the astro server might fail with some webserver 
+backend secrets error, just run `make restart-airflow`, go to
+http://0.0.0.0:8080 and enter `admin`-`admin`.**
+
+In case of updating Airflow start up connections, variables or pools in 
+`airflow_setting.yaml` or in case you can not see the `snowflake_connection_id`
+in Airflow UI, please run:
+
+```shell
+make restart-airflow
+```
+
+## Add/remove dependency
+
+Install dependency:
+```
+make install dep={{dependency}} ver={{dependency_version}} # Example: make install dep=requests ver=2.26.0
+```
+
+Uninstall dependency:
+```
+make uninstall dep={{dependency}} # Example: make uninstall dep=requests
+```
+
+## Run tests
+
+Run all tests defined in `dags/dbt/caspar_health_dbt_cosmos/tests/dags/`.
+
+```
+make run-tests
+```
+
+## Check format
+
+Checks and automatically fixes SQL and python code formats using SQLfluff 
+and Ruff requirements.
+
+```
+make fix-format
+```
+
+## Generate test report
 
 
-`minutes = steps * 0.002`
+```
+make docs
+```
 
-- A single patient can submit steps multiple times, and can complete multiple exercises.
-- Please use Python only for data extraction and injection, and use SQL for data
-manipulation.
-- Have in mind that multiple patients can generate the same amount of minutes, meaning
-that the output table can in theory have more than 1 row
-- The output should have the following columns
+## Start documentation server
 
-|patient_id:int | first_name:str | last_name:str | country:str | total_minutes:int |
-|---------------|----------------|---------------|---------------|-----------------|
-Feel free to be creative and if you have knowledge of any of the following technologies (Docker,
-cloud services, AirFlow, DBT), feel free to use them as well in your solution. If not, no worries,
-you will learn them at Caspar :)
+There is a small surprise here:
+```
+make docs-serve
+```

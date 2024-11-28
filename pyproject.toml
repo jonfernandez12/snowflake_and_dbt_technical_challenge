@@ -7,8 +7,17 @@ requires-python = ">=3.12"
 dependencies = [
     "apache-airflow-providers-snowflake>=5.8.1",
     "astronomer-cosmos>=1.7.1",
+    "pytest-html>=4.1.1",
+    "pytest>=8.3.3",
     "ruff>=0.8.0",
     "sqlfluff>=3.2.5",
+    "coverage>=7.6.8",
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.5.46",
+    "mkdocstrings>=0.27.0",
+    "mkdocs-with-pdf>=0.9.3",
+    "pytest-md>=0.2.0",
+    "pymdown-extensions>=10.12",
 ]
 [tool.ruff]
 line-length = 79

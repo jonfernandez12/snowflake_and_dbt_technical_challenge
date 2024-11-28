@@ -1,0 +1,34 @@
+site_name: Caspar Health Technical Challenge
+nav:
+  - Home: index.md
+  - Statement: statement.md
+  - Modus operandi: modus_operandi.md
+  - Faced problems: faced_problems.md
+  - Future implementations: future_implementations.md
+  - Tests Report: tests/index.html
+plugins:
+  - search
+  - mkdocstrings:
+  - with-pdf:
+      author: Jon Fernández Bedia
+      copyright: Jon Fernández Bedia
+      cover_logo: img/caspar_health_icon.jpg
+      cover_title: Caspar Health Technical Challenge
+      cover_subtitle: Patient Data ELT
+use_directory_urls: false
+theme:
+  name: material
+  favicon: img/caspar_health_icon.jpg
+  logo: img/caspar_health_icon.jpg
+extra_css:
+  - stylesheets/extra.css
+markdown_extensions:
+  - pymdownx.snippets:
+      base_path: [!relative $config_dir]
+      check_paths: true
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - pymdownx.highlight
+  - footnotes
+  - pymdownx.details
+  - footnotes

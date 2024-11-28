@@ -1,0 +1,14 @@
+airflow:
+  connections:
+    - conn_id: snowflake_connection_id
+      conn_type: snowflake
+      conn_schema: public
+      conn_login: dbt_user
+      conn_password: dbt_password
+      conn_extra:
+        account: RG94457.EU-CENTRAL-1
+        database: CASPAR_HEALTH
+        insecure_mode: false
+        role: dbt_developer_role
+        schema: public
+        warehouse: dbt_developer_warehouse

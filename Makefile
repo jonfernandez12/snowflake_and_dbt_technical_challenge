@@ -1,38 +1,29 @@
 current-dir := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 SHELL = /bin/sh
 set-up:
-	@bash -c "sudo apt-get update"
-	@bash -c "sudo pip install pipenv==2018.11.26"
-	@bash -c "sudo apt-get -y install gcc build-essential"
-	@bash -c "make install-deps"
-start: install-deps
-install-deps:
-	@if [ -z $(shell which pipenv) ]; then echo "ERROR: missing software required (pip install pipenv)" > /dev/stderr && exit 1; fi
-	@pipenv install --dev
+	@if [ "$(uname)" == "Darwin" ]; then bash -c "brew update"; elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then bash -c "apt-get update"; fi
+	@bash -c "pip install uv==0.5.4"
+	@bash -c "uv venv --python 3.12.0"
+	@bash -c "source .venv/bin/activate"
+	@uv sync
 install:
-	@PIPENV_VENV_IN_PROJECT=1 pipenv install $(dep)==$(ver)
-install-dev:
-	@PIPENV_VENV_IN_PROJECT=1 pipenv install $(dep)==$(ver) --dev
+	@uv add $(dep)==$(ver)
 uninstall:
-	@pipenv uninstall $(dep)
-remove:
-	@pipenv --rm
-run:
-	@bash -c "pipenv run app"
+	@uv remove $(dep)
+start-airflow:
+	@uv run astro dev start
+stop-airflow:
+	@uv run astro dev stop
+restart-airflow:
+	@uv run astro dev object import
+	@uv run astro dev restart
 run-tests:
-	@bash -c "pipenv run test"
-format:
-	@pipenv run isort
-	@pipenv run black
-check-format:
-	@pipenv run check-isort
-	@pipenv run check-black
-	@pipenv run check-flake8
-check-types:
-	@pipenv run check-types
+	@uv run pytest dags/dbt/caspar_health_dbt_cosmos/tests/dags/
+fix-format:
+	@uv run ruff check --fix dags/dbt/caspar_health_dbt_cosmos/
+	@uv run sqlfluff fix --dialect snowflake dags/dbt/caspar_health_dbt_cosmos/models/
 docs:
-	@pipenv run build-coverage-report
-	@pipenv run build-linter-report
-	@pipenv run build-docs
-	@bash -c "mv htmlcov public/ && mv flake-report public/"
-.PHONY: start install-deps install install-dev uninstall build deploy run run-tests format check-format check-types docs set-up
+	@uv run pytest dags/dbt/caspar_health_dbt_cosmos/tests/dags/test_dag_example.py  -vv --md=./docs/tests/index.md
+docs-serve:
+	@uv run mkdocs serve
+.PHONY: set-up install uninstall start-airflow stop-airflow restart-airflow run-tests fix-format docs docs-serve
