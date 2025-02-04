@@ -1,7 +1,7 @@
 # Snowflake and DBT technical challenge
 
-[!WARNING] 
-Currently this project is deprecated since the trial for using Snowflake has expired,
+> [!WARNING]
+> Currently this project is deprecated since the trial for using Snowflake has expired,
 please connect a new Snowflake account and update the credentials or pay for the
 existing Snowflake account. Furthermore, all the data related with the company involved in the challenge will deleted for privacy reasons.
 
