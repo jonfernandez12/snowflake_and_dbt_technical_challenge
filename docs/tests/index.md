@@ -13,13 +13,13 @@
 
 ## 1 passed
 
-### dags/dbt/caspar_health_dbt_cosmos/tests/dags/test_dag_example.py
+### dags/dbt/dbt_cosmos/tests/dags/test_dag_example.py
 
 `test_file_imports[None-None]` 0.00s
 
 ## 2 skipped
 
-### dags/dbt/caspar_health_dbt_cosmos/tests/dags/test_dag_example.py
+### dags/dbt/dbt_cosmos/tests/dags/test_dag_example.py
 
 `test_dag_tags[dag_id0-dag0-fileloc0]` 0.00s
 

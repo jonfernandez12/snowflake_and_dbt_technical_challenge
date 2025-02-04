@@ -53,7 +53,6 @@ that the output table can in theory have more than 1 row
 
 
 Feel free to be creative and if you have knowledge of any of the following technologies (Docker,
-cloud services, AirFlow, DBT), feel free to use them as well in your solution. If not, no worries,
-you will learn them at Caspar :)
+cloud services, AirFlow, DBT), feel free to use them as well in your solution. 
 
 

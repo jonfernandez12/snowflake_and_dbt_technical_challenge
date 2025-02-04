@@ -4,10 +4,10 @@ from cosmos import DbtDag, ProjectConfig, ProfileConfig, ExecutionConfig
 from cosmos.profiles import SnowflakeUserPasswordProfileMapping
 from pathlib import Path
 
-dbt_project_path = Path("/usr/local/airflow/dags/dbt/caspar_health_dbt_cosmos")
+dbt_project_path = Path("/usr/local/airflow/dags/dbt/dbt_cosmos")
 
 profile_config = ProfileConfig(
-    profile_name="caspar_health_technical_challenge",
+    profile_name="snowflake_and_dbt_technical_challenge",
     target_name="dev",
     profile_mapping=SnowflakeUserPasswordProfileMapping(
         conn_id="snowflake_connection_id",

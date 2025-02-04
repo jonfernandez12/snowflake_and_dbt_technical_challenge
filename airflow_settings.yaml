@@ -7,7 +7,7 @@ airflow:
       conn_password: dbt_password
       conn_extra:
         account: RG94457.EU-CENTRAL-1
-        database: CASPAR_HEALTH
+        database: HEALTH
         insecure_mode: false
         role: dbt_developer_role
         schema: public

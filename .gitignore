@@ -3,3 +3,6 @@
 __pycache__/
 .venv
 logs/*
+airflow_settings.yaml
+dags/dbt/dbt_cosmos/seeds/*
+dags/dbt/dbt_cosmos/logs/*

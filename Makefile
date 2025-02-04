@@ -18,12 +18,12 @@ restart-airflow:
 	@uv run astro dev object import
 	@uv run astro dev restart
 run-tests:
-	@uv run pytest dags/dbt/caspar_health_dbt_cosmos/tests/dags/
+	@uv run pytest dags/dbt/dbt_cosmos/tests/dags/
 fix-format:
-	@uv run ruff check --fix dags/dbt/caspar_health_dbt_cosmos/
-	@uv run sqlfluff fix --dialect snowflake dags/dbt/caspar_health_dbt_cosmos/models/
+	@uv run ruff check --fix dags/dbt/dbt_cosmos/
+	@uv run sqlfluff fix --dialect snowflake dags/dbt/dbt_cosmos/models/
 docs:
-	@uv run pytest dags/dbt/caspar_health_dbt_cosmos/tests/dags/test_dag_example.py  -vv --md=./docs/tests/index.md
+	@uv run pytest dags/dbt/dbt_cosmos/tests/dags/test_dag_example.py  -vv --md=./docs/tests/index.md
 docs-serve:
 	@uv run mkdocs serve
 .PHONY: set-up install uninstall start-airflow stop-airflow restart-airflow run-tests fix-format docs docs-serve

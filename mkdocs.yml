@@ -1,4 +1,4 @@
-site_name: Caspar Health Technical Challenge
+site_name: Snowflake and DBT Technical Challenge
 nav:
   - Home: index.md
   - Statement: statement.md
@@ -12,14 +12,11 @@ plugins:
   - with-pdf:
       author: Jon Fernández Bedia
       copyright: Jon Fernández Bedia
-      cover_logo: img/caspar_health_icon.jpg
-      cover_title: Caspar Health Technical Challenge
+      cover_title: Snowflake and DBT Technical Challenge
       cover_subtitle: Patient Data ELT
 use_directory_urls: false
 theme:
   name: material
-  favicon: img/caspar_health_icon.jpg
-  logo: img/caspar_health_icon.jpg
 extra_css:
   - stylesheets/extra.css
 markdown_extensions:

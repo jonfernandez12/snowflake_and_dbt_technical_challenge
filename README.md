@@ -1,6 +1,9 @@
-# Caspar Health Technical challenge
+# Snowflake and DBT technical challenge
 
-Technical challenge for Caspar Health.
+[!WARNING] 
+Currently this project is deprecated since the trial for using Snowflake has expired,
+please connect a new Snowflake account and update the credentials or pay for the
+existing Snowflake account. Furthermore, all the data related with the company involved in the challenge will deleted for privacy reasons.
 
 In the following sections you will find more information about the challenge
 itself as well as the technical details about the infrastructure, data model
@@ -59,7 +62,7 @@ make uninstall dep={{dependency}} # Example: make uninstall dep=requests
 
 ## Run tests
 
-Run all tests defined in `dags/dbt/caspar_health_dbt_cosmos/tests/dags/`.
+Run all tests defined in `dags/dbt/dbt_cosmos/tests/dags/`.
 
 ```
 make run-tests

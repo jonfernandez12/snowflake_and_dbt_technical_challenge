@@ -153,7 +153,7 @@ data to Snowflake.
 
 The table creation script I used for the staging tables is the following:
 ```snowflake
-CREATE OR REPLACE DATABASE caspar_health;
+CREATE OR REPLACE DATABASE health;
 USE ROLE dbt_developer_role;
 
 CREATE TABLE stg_patients (
@@ -190,7 +190,7 @@ I wanted to try uv out, is supposed to be very fast.
 
 ```
 brew install uv
-uv init caspar_health_technical_challenge
+uv init snowflake_and_dbt_technical_challenge
 uv add dbt-core
 uv add dbt-snowflake
 ```
@@ -203,11 +203,11 @@ I run `dbt init` to create the dbt project. Then, `dbt deps` to install the
 dependencies (`dbt-labs/dbt_utils`). The dbt profile would look as follows:
 
 ```shell
-caspar_health_technical_challenge:
+snowflake_and_dbt_technical_challenge:
   outputs:
     dev:
       account: RG94457.EU-CENTRAL-1
-      database: CASPAR_HEALTH
+      database: HEALTH
       password: dbt_password
       role: dbt_developer_role
       schema: rehabilitation_data
@@ -239,14 +239,14 @@ but I got the following error:
 
 ```shell
 Runtime Error
-  Database error while listing schemas in database "CASPAR_HEALTH"
+  Database error while listing schemas in database "HEALTH"
   Database Error
     002043 (02000): SQL compilation error:
     Object does not exist, or operation cannot be performed.
 ```
 
 And since I could not see the query, I went to the logs, and apparently I was 
-trying to run `show objects in CASPAR_HEALTH.rehabilitation_data limit 10000`
+trying to run `show objects in HEALTH.rehabilitation_data limit 10000`
 but, of course, `rehabilitation_data` schema does not exist, it should 
 be `public` instead. For some reason, I thought that DBT was creating a 
 new schema when adding data from seeds.
@@ -319,7 +319,7 @@ previous table with `1`.
 
 ```snowflake
 SELECT *
-FROM caspar_health.analysis.results_patients;
+FROM health.analysis.results_patients;
 ```
 
 
@@ -344,7 +344,7 @@ ready to be deployed.
 
 We can create a dockerized airflow repository by creating a new folder and 
 running `astro dev init` (from [astro](https://www.astronomer.io/docs/astro/)), after that I will just add all my dbt packages
-inside `dags/dbt/caspar_health_dbt_cosmos` folder.
+inside `dags/dbt/dbt_cosmos` folder.
 
 ## Setting up the DAG
 

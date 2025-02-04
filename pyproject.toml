@@ -1,5 +1,5 @@
 [project]
-name = "caspar-health-technical-challenge"
+name = "snowflake-and-dbt-technical-challenge"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
